@@ -32,6 +32,8 @@ require (
 	go.uber.org/zap v1.13.0 // indirect
 	google.golang.org/genproto v0.0.0-20200122232147-0452cf42e150
 	google.golang.org/grpc v1.26.0
+	gopkg.in/couchbaselabs/gocbconnstr.v1 v1.0.4 // indirect
+	gopkg.in/couchbaselabs/jsonx.v1 v1.0.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.0 // indirect
 	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/api v0.17.8
@@ -50,3 +52,5 @@ replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.0+incompatible
 	k8s.io/client => github.com/kubernetes-client/go v0.0.0-20190928040339-c757968c4c36
 )
+
+replace github.com/dapr/components-contrib => ../components-contrib
