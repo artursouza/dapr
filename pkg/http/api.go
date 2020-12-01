@@ -16,6 +16,7 @@ import (
 	"github.com/dapr/components-contrib/secretstores"
 	"github.com/dapr/components-contrib/state"
 	"github.com/dapr/dapr/pkg/actors"
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	"github.com/dapr/dapr/pkg/channel"
 	"github.com/dapr/dapr/pkg/channel/http"
 	"github.com/dapr/dapr/pkg/concurrency"
@@ -57,7 +58,7 @@ type api struct {
 	id                    string
 	extendedMetadata      sync.Map
 	readyStatus           bool
-	tracingSpec           config.TracingSpec
+	tracingSpec           v1alpha1.TracingSpec
 }
 
 type metadata struct {
@@ -97,7 +98,7 @@ func NewAPI(
 	publishFn func(*pubsub.PublishRequest) error,
 	actor actors.Actors,
 	sendToOutputBindingFn func(name string, req *bindings.InvokeRequest) (*bindings.InvokeResponse, error),
-	tracingSpec config.TracingSpec) API {
+	tracingSpec v1alpha1.TracingSpec) API {
 	api := &api{
 		appChannel:            appChannel,
 		directMessaging:       directMessaging,

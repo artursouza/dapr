@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	"github.com/dapr/dapr/pkg/channel"
-	"github.com/dapr/dapr/pkg/config"
 	diag "github.com/dapr/dapr/pkg/diagnostics"
 	invokev1 "github.com/dapr/dapr/pkg/messaging/v1"
 	commonv1pb "github.com/dapr/dapr/pkg/proto/common/v1"
@@ -35,12 +35,12 @@ type Channel struct {
 	client      *fasthttp.Client
 	baseAddress string
 	ch          chan int
-	tracingSpec config.TracingSpec
+	tracingSpec v1alpha1.TracingSpec
 }
 
 // CreateLocalChannel creates an HTTP AppChannel
 // nolint:gosec
-func CreateLocalChannel(port, maxConcurrency int, spec config.TracingSpec, sslEnabled bool) (channel.AppChannel, error) {
+func CreateLocalChannel(port, maxConcurrency int, spec v1alpha1.TracingSpec, sslEnabled bool) (channel.AppChannel, error) {
 	scheme := httpScheme
 	if sslEnabled {
 		scheme = httpsScheme

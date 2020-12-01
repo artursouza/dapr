@@ -16,6 +16,7 @@ import (
 	"github.com/dapr/components-contrib/secretstores"
 	"github.com/dapr/components-contrib/state"
 	"github.com/dapr/dapr/pkg/actors"
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	"github.com/dapr/dapr/pkg/channel"
 	"github.com/dapr/dapr/pkg/concurrency"
 	"github.com/dapr/dapr/pkg/config"
@@ -79,7 +80,7 @@ type api struct {
 	publishFn             func(req *pubsub.PublishRequest) error
 	id                    string
 	sendToOutputBindingFn func(name string, req *bindings.InvokeRequest) (*bindings.InvokeResponse, error)
-	tracingSpec           config.TracingSpec
+	tracingSpec           v1alpha1.TracingSpec
 	accessControlList     *config.AccessControlList
 	appProtocol           string
 }
@@ -94,7 +95,7 @@ func NewAPI(
 	directMessaging messaging.DirectMessaging,
 	actor actors.Actors,
 	sendToOutputBindingFn func(name string, req *bindings.InvokeRequest) (*bindings.InvokeResponse, error),
-	tracingSpec config.TracingSpec,
+	tracingSpec v1alpha1.TracingSpec,
 	accessControlList *config.AccessControlList,
 	appProtocol string) API {
 	return &api{

@@ -11,10 +11,10 @@ import (
 	"strings"
 
 	cors "github.com/AdhityaRamadhanus/fasthttpcors"
-	"github.com/dapr/dapr/pkg/config"
 	cors_dapr "github.com/dapr/dapr/pkg/cors"
 	"github.com/dapr/dapr/pkg/logger"
 
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	diag "github.com/dapr/dapr/pkg/diagnostics"
 	diag_utils "github.com/dapr/dapr/pkg/diagnostics/utils"
 	http_middleware "github.com/dapr/dapr/pkg/middleware/http"
@@ -33,14 +33,14 @@ type Server interface {
 
 type server struct {
 	config      ServerConfig
-	tracingSpec config.TracingSpec
-	metricSpec  config.MetricSpec
+	tracingSpec v1alpha1.TracingSpec
+	metricSpec  v1alpha1.MetricSpec
 	pipeline    http_middleware.Pipeline
 	api         API
 }
 
 // NewServer returns a new HTTP server
-func NewServer(api API, config ServerConfig, tracingSpec config.TracingSpec, metricSpec config.MetricSpec, pipeline http_middleware.Pipeline) Server {
+func NewServer(api API, config ServerConfig, tracingSpec v1alpha1.TracingSpec, metricSpec v1alpha1.MetricSpec, pipeline http_middleware.Pipeline) Server {
 	return &server{
 		api:         api,
 		config:      config,

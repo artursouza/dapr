@@ -33,7 +33,7 @@ func TestGetMiddlewareOptions(t *testing.T) {
 	t.Run("should enable unary interceptor if tracing and metrics are enabled", func(t *testing.T) {
 		fakeServer := &server{
 			config: ServerConfig{},
-			tracingSpec: config.TracingSpec{
+			tracingSpec: v1alpha1.TracingSpec{
 				SamplingRate: "1",
 			},
 			renewMutex: &sync.Mutex{},
@@ -48,7 +48,7 @@ func TestGetMiddlewareOptions(t *testing.T) {
 	t.Run("should not disable middleware even when SamplingRate is 0", func(t *testing.T) {
 		fakeServer := &server{
 			config: ServerConfig{},
-			tracingSpec: config.TracingSpec{
+			tracingSpec: v1alpha1.TracingSpec{
 				SamplingRate: "0",
 			},
 			renewMutex: &sync.Mutex{},

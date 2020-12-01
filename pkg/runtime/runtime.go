@@ -27,6 +27,7 @@ import (
 	"github.com/dapr/components-contrib/state"
 	"github.com/dapr/dapr/pkg/actors"
 	components_v1alpha1 "github.com/dapr/dapr/pkg/apis/components/v1alpha1"
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	"github.com/dapr/dapr/pkg/channel"
 	http_channel "github.com/dapr/dapr/pkg/channel/http"
 	"github.com/dapr/dapr/pkg/components"
@@ -101,7 +102,7 @@ type TopicRoute struct {
 // DaprRuntime holds all the core components of the runtime
 type DaprRuntime struct {
 	runtimeConfig          *Config
-	globalConfig           *config.Configuration
+	globalConfig           *v1alpha1.Configuration
 	accessControlList      *config.AccessControlList
 	components             []components_v1alpha1.Component
 	grpc                   *grpc.Manager
@@ -147,7 +148,7 @@ type componentPreprocessRes struct {
 }
 
 // NewDaprRuntime returns a new runtime with the given runtime config and global config
-func NewDaprRuntime(runtimeConfig *Config, globalConfig *config.Configuration, accessControlList *config.AccessControlList) *DaprRuntime {
+func NewDaprRuntime(runtimeConfig *Config, globalConfig *v1alpha1.Configuration, accessControlList *config.AccessControlList) *DaprRuntime {
 	return &DaprRuntime{
 		runtimeConfig:          runtimeConfig,
 		globalConfig:           globalConfig,
@@ -1534,7 +1535,7 @@ func (a *DaprRuntime) getConfigurationGRPC() (*config.ApplicationConfig, error) 
 
 func (a *DaprRuntime) createAppChannel() error {
 	if a.runtimeConfig.ApplicationPort > 0 {
-		var channelCreatorFn func(port, maxConcurrency int, spec config.TracingSpec, sslEnabled bool) (channel.AppChannel, error)
+		var channelCreatorFn func(port, maxConcurrency int, spec v1alpha1.TracingSpec, sslEnabled bool) (channel.AppChannel, error)
 
 		switch a.runtimeConfig.ApplicationProtocol {
 		case GRPCProtocol:

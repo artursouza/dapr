@@ -101,7 +101,7 @@ func newTestActorsRuntimeWithMock(mockAppChannel *channelt.MockAppChannel) *acto
 
 	mockAppChannel.On("GetBaseAddress").Return("http://127.0.0.1", nil)
 
-	spec := config.TracingSpec{SamplingRate: "1"}
+	spec := v1alpha1.TracingSpec{SamplingRate: "1"}
 	store := fakeStore()
 	config := NewConfig("", TestAppID, []string{""}, nil, 0, "", "", "", false, "")
 	a := NewActors(store, mockAppChannel, nil, config, nil, spec)

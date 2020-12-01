@@ -129,7 +129,7 @@ func startTestServerWithTracing(port int) (*grpc.Server, *string) {
 		},
 	})
 
-	spec := config.TracingSpec{SamplingRate: "1"}
+	spec := v1alpha1.TracingSpec{SamplingRate: "1"}
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(diag.GRPCTraceUnaryServerInterceptor("id", spec))),
 	)

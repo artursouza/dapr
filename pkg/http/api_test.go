@@ -289,7 +289,7 @@ func TestV1OutputBindingsEndpoints(t *testing.T) {
 func TestV1OutputBindingsEndpointsWithTracer(t *testing.T) {
 	fakeServer := newFakeHTTPServer()
 	buffer := ""
-	spec := config.TracingSpec{SamplingRate: "1"}
+	spec := v1alpha1.TracingSpec{SamplingRate: "1"}
 
 	meta := exporters.Metadata{
 		Buffer: &buffer,
@@ -523,7 +523,7 @@ func TestV1DirectMessagingEndpointsWithTracer(t *testing.T) {
 	fakeServer := newFakeHTTPServer()
 
 	buffer := ""
-	spec := config.TracingSpec{SamplingRate: "1"}
+	spec := v1alpha1.TracingSpec{SamplingRate: "1"}
 
 	meta := exporters.Metadata{
 		Buffer: &buffer,
@@ -1282,7 +1282,7 @@ func TestV1ActorEndpointsWithTracer(t *testing.T) {
 	fakeServer := newFakeHTTPServer()
 
 	buffer := ""
-	spec := config.TracingSpec{SamplingRate: "1"}
+	spec := v1alpha1.TracingSpec{SamplingRate: "1"}
 
 	meta := exporters.Metadata{
 		Buffer: &buffer,
@@ -1554,7 +1554,7 @@ func TestEmptyPipelineWithTracer(t *testing.T) {
 	fakeServer := newFakeHTTPServer()
 
 	buffer := ""
-	spec := config.TracingSpec{SamplingRate: "1.0"}
+	spec := v1alpha1.TracingSpec{SamplingRate: "1.0"}
 	pipe := http_middleware.Pipeline{}
 
 	meta := exporters.Metadata{
@@ -1641,7 +1641,7 @@ func TestSinglePipelineWithTracer(t *testing.T) {
 	fakeServer := newFakeHTTPServer()
 
 	buffer := ""
-	spec := config.TracingSpec{SamplingRate: "1.0"}
+	spec := v1alpha1.TracingSpec{SamplingRate: "1.0"}
 
 	pipeline := buildHTTPPineline(config.PipelineSpec{
 		Handlers: []config.HandlerSpec{
@@ -1713,7 +1713,7 @@ func TestSinglePipelineWithNoTracing(t *testing.T) {
 	fakeServer := newFakeHTTPServer()
 
 	buffer := ""
-	spec := config.TracingSpec{SamplingRate: "0"}
+	spec := v1alpha1.TracingSpec{SamplingRate: "0"}
 
 	pipeline := buildHTTPPineline(config.PipelineSpec{
 		Handlers: []config.HandlerSpec{
@@ -1805,7 +1805,7 @@ func (f *fakeHTTPServer) StartServer(endpoints []Endpoint) {
 	}
 }
 
-func (f *fakeHTTPServer) StartServerWithTracing(spec config.TracingSpec, endpoints []Endpoint) {
+func (f *fakeHTTPServer) StartServerWithTracing(spec v1alpha1.TracingSpec, endpoints []Endpoint) {
 	router := f.getRouter(endpoints)
 	f.ln = fasthttputil.NewInmemoryListener()
 	go func() {
@@ -1841,7 +1841,7 @@ func (f *fakeHTTPServer) StartServerWithAPIToken(endpoints []Endpoint) {
 	}
 }
 
-func (f *fakeHTTPServer) StartServerWithTracingAndPipeline(spec config.TracingSpec, pipeline http_middleware.Pipeline, endpoints []Endpoint) {
+func (f *fakeHTTPServer) StartServerWithTracingAndPipeline(spec v1alpha1.TracingSpec, pipeline http_middleware.Pipeline, endpoints []Endpoint) {
 	router := f.getRouter(endpoints)
 	f.ln = fasthttputil.NewInmemoryListener()
 	go func() {

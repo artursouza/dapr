@@ -101,7 +101,7 @@ func TestSpanContextToGRPCMetadata(t *testing.T) {
 }
 
 func TestGRPCTraceUnaryServerInterceptor(t *testing.T) {
-	rate := config.TracingSpec{SamplingRate: "1"}
+	rate := v1alpha1.TracingSpec{SamplingRate: "1"}
 	interceptor := GRPCTraceUnaryServerInterceptor("fakeAppID", rate)
 
 	testTraceParent := "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"

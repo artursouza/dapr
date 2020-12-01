@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/dapr/dapr/pkg/config"
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	diag_utils "github.com/dapr/dapr/pkg/diagnostics/utils"
 	"github.com/valyala/fasthttp"
 	"go.opencensus.io/trace"
@@ -35,7 +35,7 @@ const (
 var trimOWSRegExp = regexp.MustCompile(trimOWSRegexFmt)
 
 // HTTPTraceMiddleware sets the trace context or starts the trace client span based on request
-func HTTPTraceMiddleware(next fasthttp.RequestHandler, appID string, spec config.TracingSpec) fasthttp.RequestHandler {
+func HTTPTraceMiddleware(next fasthttp.RequestHandler, appID string, spec v1alpha1.TracingSpec) fasthttp.RequestHandler {
 	return func(ctx *fasthttp.RequestCtx) {
 		path := string(ctx.Request.URI().Path())
 		if isHealthzRequest(path) {
@@ -84,7 +84,7 @@ func userDefinedHTTPHeaders(reqCtx *fasthttp.RequestCtx) map[string]string {
 	return m
 }
 
-func startTracingClientSpanFromHTTPContext(ctx *fasthttp.RequestCtx, spanName string, spec config.TracingSpec) (*fasthttp.RequestCtx, *trace.Span) {
+func startTracingClientSpanFromHTTPContext(ctx *fasthttp.RequestCtx, spanName string, spec v1alpha1.TracingSpec) (*fasthttp.RequestCtx, *trace.Span) {
 	sc, _ := SpanContextFromRequest(&ctx.Request)
 	probSamplerOption := diag_utils.TraceSampler(spec.SamplingRate)
 	kindOption := trace.WithSpanKind(trace.SpanKindClient)

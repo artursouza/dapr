@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	"github.com/dapr/dapr/pkg/channel"
 	grpc_channel "github.com/dapr/dapr/pkg/channel/grpc"
-	"github.com/dapr/dapr/pkg/config"
 	diag "github.com/dapr/dapr/pkg/diagnostics"
 	"github.com/dapr/dapr/pkg/modes"
 	"github.com/dapr/dapr/pkg/runtime/security"
@@ -53,7 +53,7 @@ func (g *Manager) SetAuthenticator(auth security.Authenticator) {
 }
 
 // CreateLocalChannel creates a new gRPC AppChannel
-func (g *Manager) CreateLocalChannel(port, maxConcurrency int, spec config.TracingSpec, sslEnabled bool) (channel.AppChannel, error) {
+func (g *Manager) CreateLocalChannel(port, maxConcurrency int, spec v1alpha1.TracingSpec, sslEnabled bool) (channel.AppChannel, error) {
 	conn, err := g.GetGRPCConnection(fmt.Sprintf("127.0.0.1:%v", port), "", "", true, false, sslEnabled)
 	if err != nil {
 		return nil, errors.Errorf("error establishing connection to app grpc on port %v: %s", port, err)

@@ -51,7 +51,7 @@ func NewTelemetryClient() *TelemetryClient {
 
 // Init initializes metrics pipeline and starts metrics http endpoint.
 func (t *TelemetryClient) Init() {
-	exporter, err := prometheus.InstallNewPipeline(prometheus.Config{})
+	exporter, err := .InstallNewPipeline(prometheus.Config{})
 	if err != nil {
 		log.Fatalf("failed to initialize prometheus exporter %v", err)
 	}

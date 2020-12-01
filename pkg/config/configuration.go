@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	"github.com/dapr/dapr/pkg/logger"
 	"github.com/dapr/dapr/pkg/proto/common/v1"
 	operatorv1pb "github.com/dapr/dapr/pkg/proto/operator/v1"
@@ -43,10 +44,6 @@ const (
 	GRPCProtocol        = "grpc"
 )
 
-type Configuration struct {
-	Spec ConfigurationSpec `json:"spec" yaml:"spec"`
-}
-
 // AccessControlList is an in-memory access control list config for fast lookup
 type AccessControlList struct {
 	DefaultAction string
@@ -70,17 +67,11 @@ type AccessControlListOperationAction struct {
 	OperationAction  string
 }
 
-type ConfigurationSpec struct {
-	HTTPPipelineSpec  PipelineSpec      `json:"httpPipeline,omitempty" yaml:"httpPipeline,omitempty"`
-	TracingSpec       TracingSpec       `json:"tracing,omitempty" yaml:"tracing,omitempty"`
-	MTLSSpec          MTLSSpec          `json:"mtls,omitempty"`
-	MetricSpec        MetricSpec        `json:"metric,omitempty" yaml:"metric,omitempty"`
-	Secrets           SecretsSpec       `json:"secrets,omitempty" yaml:"secrets,omitempty"`
-	AccessControlSpec AccessControlSpec `json:"accessControl,omitempty" yaml:"accessControl,omitempty"`
-}
-
-type SecretsSpec struct {
-	Scopes []SecretsScope `json:"scopes"`
+// AppOperation defines the data structure for each app operation
+type AppOperation struct {
+	Operation string   `json:"name" yaml:"name"`
+	HTTPVerb  []string `json:"httpVerb" yaml:"httpVerb"`
+	Action    string   `json:"action" yaml:"action"`
 }
 
 // SecretsScope defines the scope for secrets
@@ -91,64 +82,6 @@ type SecretsScope struct {
 	DeniedSecrets  []string `json:"deniedSecrets,omitempty" yaml:"deniedSecrets,omitempty"`
 }
 
-type PipelineSpec struct {
-	Handlers []HandlerSpec `json:"handlers" yaml:"handlers"`
-}
-
-type HandlerSpec struct {
-	Name         string       `json:"name" yaml:"name"`
-	Type         string       `json:"type" yaml:"type"`
-	SelectorSpec SelectorSpec `json:"selector,omitempty" yaml:"selector,omitempty"`
-}
-
-type SelectorSpec struct {
-	Fields []SelectorField `json:"fields" yaml:"fields"`
-}
-
-type SelectorField struct {
-	Field string `json:"field" yaml:"field"`
-	Value string `json:"value" yaml:"value"`
-}
-
-type TracingSpec struct {
-	SamplingRate string `json:"samplingRate" yaml:"samplingRate"`
-	Stdout       bool   `json:"stdout" yaml:"stdout"`
-}
-
-// MetricSpec configuration for metrics
-type MetricSpec struct {
-	Enabled bool `json:"enabled" yaml:"enabled"`
-}
-
-// AppPolicySpec defines the policy data structure for each app
-type AppPolicySpec struct {
-	AppName             string         `json:"appId" yaml:"appId"`
-	DefaultAction       string         `json:"defaultAction" yaml:"defaultAction"`
-	TrustDomain         string         `json:"trustDomain" yaml:"trustDomain"`
-	Namespace           string         `json:"namespace" yaml:"namespace"`
-	AppOperationActions []AppOperation `json:"operations" yaml:"operations"`
-}
-
-// AppOperation defines the data structure for each app operation
-type AppOperation struct {
-	Operation string   `json:"name" yaml:"name"`
-	HTTPVerb  []string `json:"httpVerb" yaml:"httpVerb"`
-	Action    string   `json:"action" yaml:"action"`
-}
-
-// AccessControlSpec is the spec object in ConfigurationSpec
-type AccessControlSpec struct {
-	DefaultAction string          `json:"defaultAction" yaml:"defaultAction"`
-	TrustDomain   string          `json:"trustDomain" yaml:"trustDomain"`
-	AppPolicies   []AppPolicySpec `json:"policies" yaml:"policies"`
-}
-
-type MTLSSpec struct {
-	Enabled          bool   `json:"enabled"`
-	WorkloadCertTTL  string `json:"workloadCertTTL"`
-	AllowedClockSkew string `json:"allowedClockSkew"`
-}
-
 // SpiffeID represents the separated fields in a spiffe id
 type SpiffeID struct {
 	TrustDomain string
@@ -157,16 +90,16 @@ type SpiffeID struct {
 }
 
 // LoadDefaultConfiguration returns the default config
-func LoadDefaultConfiguration() *Configuration {
-	return &Configuration{
-		Spec: ConfigurationSpec{
-			TracingSpec: TracingSpec{
+func LoadDefaultConfiguration() *v1alpha1.Configuration {
+	return &v1alpha1.Configuration{
+		Spec: v1alpha1.ConfigurationSpec{
+			TracingSpec: v1alpha1.TracingSpec{
 				SamplingRate: "",
 			},
-			MetricSpec: MetricSpec{
+			MetricSpec: v1alpha1.MetricSpec{
 				Enabled: true,
 			},
-			AccessControlSpec: AccessControlSpec{
+			AccessControlSpec: v1alpha1.AccessControlSpec{
 				DefaultAction: AllowAccess,
 				TrustDomain:   "public",
 			},
@@ -175,7 +108,7 @@ func LoadDefaultConfiguration() *Configuration {
 }
 
 // LoadStandaloneConfiguration gets the path to a config file and loads it into a configuration
-func LoadStandaloneConfiguration(config string) (*Configuration, error) {
+func LoadStandaloneConfiguration(config string) (*v1alpha1.Configuration, error) {
 	_, err := os.Stat(config)
 	if err != nil {
 		return nil, err
@@ -200,7 +133,7 @@ func LoadStandaloneConfiguration(config string) (*Configuration, error) {
 }
 
 // LoadKubernetesConfiguration gets configuration from the Kubernetes operator with a given name
-func LoadKubernetesConfiguration(config, namespace string, operatorClient operatorv1pb.OperatorClient) (*Configuration, error) {
+func LoadKubernetesConfiguration(config, namespace string, operatorClient operatorv1pb.OperatorClient) (*v1alpha1.Configuration, error) {
 	resp, err := operatorClient.GetConfiguration(context.Background(), &operatorv1pb.GetConfigurationRequest{
 		Name:      config,
 		Namespace: namespace,
@@ -226,7 +159,7 @@ func LoadKubernetesConfiguration(config, namespace string, operatorClient operat
 }
 
 // Validate the secrets configuration and sort the allow and deny lists if present.
-func sortAndValidateSecretsConfiguration(conf *Configuration) error {
+func sortAndValidateSecretsConfiguration(conf *v1alpha1.Configuration) error {
 	scopes := conf.Spec.Secrets.Scopes
 	set := sets.NewString()
 	for _, scope := range scopes {
@@ -281,7 +214,7 @@ func containsKey(s []string, key string) bool {
 }
 
 // ParseAccessControlSpec creates an in-memory copy of the Access Control Spec for fast lookup
-func ParseAccessControlSpec(accessControlSpec AccessControlSpec) (*AccessControlList, error) {
+func ParseAccessControlSpec(accessControlSpec v1alpha1.AccessControlSpec) (*AccessControlList, error) {
 	if accessControlSpec.TrustDomain == "" &&
 		accessControlSpec.DefaultAction == "" &&
 		(accessControlSpec.AppPolicies == nil || len(accessControlSpec.AppPolicies) == 0) {

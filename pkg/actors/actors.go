@@ -18,8 +18,8 @@ import (
 
 	"github.com/dapr/components-contrib/state"
 	"github.com/dapr/dapr/pkg/actors/internal"
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	"github.com/dapr/dapr/pkg/channel"
-	"github.com/dapr/dapr/pkg/config"
 	dapr_credentials "github.com/dapr/dapr/pkg/credentials"
 	diag "github.com/dapr/dapr/pkg/diagnostics"
 	diag_utils "github.com/dapr/dapr/pkg/diagnostics/utils"
@@ -77,7 +77,7 @@ type actorsRuntime struct {
 	evaluationChan      chan bool
 	appHealthy          bool
 	certChain           *dapr_credentials.CertChain
-	tracingSpec         config.TracingSpec
+	tracingSpec         v1alpha1.TracingSpec
 }
 
 // ActiveActorsCount contain actorType and count of actors each type has
@@ -97,7 +97,7 @@ func NewActors(
 	grpcConnectionFn func(address, id string, namespace string, skipTLS, recreateIfExists, enableSSL bool) (*grpc.ClientConn, error),
 	config Config,
 	certChain *dapr_credentials.CertChain,
-	tracingSpec config.TracingSpec) Actors {
+	tracingSpec v1alpha1.TracingSpec) Actors {
 	return &actorsRuntime{
 		appChannel:          appChannel,
 		config:              config,

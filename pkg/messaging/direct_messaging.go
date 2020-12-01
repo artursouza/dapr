@@ -12,8 +12,8 @@ import (
 	"time"
 
 	nr "github.com/dapr/components-contrib/nameresolution"
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	"github.com/dapr/dapr/pkg/channel"
-	"github.com/dapr/dapr/pkg/config"
 	diag "github.com/dapr/dapr/pkg/diagnostics"
 	diag_utils "github.com/dapr/dapr/pkg/diagnostics/utils"
 	"github.com/dapr/dapr/pkg/modes"
@@ -46,7 +46,7 @@ type directMessaging struct {
 	grpcPort            int
 	namespace           string
 	resolver            nr.Resolver
-	tracingSpec         config.TracingSpec
+	tracingSpec         v1alpha1.TracingSpec
 	hostAddress         string
 	hostName            string
 }
@@ -64,7 +64,7 @@ func NewDirectMessaging(
 	appChannel channel.AppChannel,
 	clientConnFn messageClientConnection,
 	resolver nr.Resolver,
-	tracingSpec config.TracingSpec) DirectMessaging {
+	tracingSpec v1alpha1.TracingSpec) DirectMessaging {
 	hAddr, _ := utils.GetHostAddress()
 	hName, _ := os.Hostname()
 	return &directMessaging{

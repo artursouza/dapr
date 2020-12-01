@@ -19,7 +19,7 @@ type Configuration struct {
 	// +optional
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 	// +optional
-	Spec ConfigurationSpec `json:"spec,omitempty"`
+	Spec ConfigurationSpec `json:"spec,omitempty" yaml:"spec,omitempty"`
 }
 
 // ConfigurationSpec is the spec for an configuration
@@ -89,6 +89,7 @@ type SelectorField struct {
 // TracingSpec defines distributed tracing configuration
 type TracingSpec struct {
 	SamplingRate string `json:"samplingRate"`
+	Stdout       bool   `json:"stdout"`
 }
 
 // MetricSpec defines metrics configuration

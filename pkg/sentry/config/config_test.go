@@ -23,8 +23,8 @@ func TestConfig(t *testing.T) {
 	})
 
 	t.Run("parse configuration", func(t *testing.T) {
-		daprConfig := dapr_config.Configuration{
-			Spec: dapr_config.ConfigurationSpec{
+		daprConfig := dapr_v1alpha1.Configuration{
+			Spec: dapr_v1alpha1.ConfigurationSpec{
 				MTLSSpec: dapr_config.MTLSSpec{
 					Enabled:          true,
 					WorkloadCertTTL:  "5s",

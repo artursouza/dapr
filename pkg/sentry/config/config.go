@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	scheme "github.com/dapr/dapr/pkg/client/clientset/versioned"
 	dapr_config "github.com/dapr/dapr/pkg/config"
 	"github.com/dapr/dapr/pkg/logger"
@@ -109,10 +110,10 @@ func getKubernetesConfig(configName string) (SentryConfig, error) {
 		if i.GetName() == configName {
 			spec, _ := json.Marshal(i.Spec)
 
-			var configSpec dapr_config.ConfigurationSpec
+			var configSpec v1alpha1.ConfigurationSpec
 			json.Unmarshal(spec, &configSpec)
 
-			conf := dapr_config.Configuration{
+			conf := v1alpha1.Configuration{
 				Spec: configSpec,
 			}
 			return parseConfiguration(defaultConfig, &conf)
@@ -134,7 +135,7 @@ func getSelfhostedConfig(configName string) (SentryConfig, error) {
 	return defaultConfig, nil
 }
 
-func parseConfiguration(conf SentryConfig, daprConfig *dapr_config.Configuration) (SentryConfig, error) {
+func parseConfiguration(conf SentryConfig, daprConfig *v1alpha1.Configuration) (SentryConfig, error) {
 	if daprConfig.Spec.MTLSSpec.WorkloadCertTTL != "" {
 		d, err := time.ParseDuration(daprConfig.Spec.MTLSSpec.WorkloadCertTTL)
 		if err != nil {

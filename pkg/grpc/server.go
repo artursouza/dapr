@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dapr/dapr/pkg/config"
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	diag "github.com/dapr/dapr/pkg/diagnostics"
 	diag_utils "github.com/dapr/dapr/pkg/diagnostics/utils"
 	"github.com/dapr/dapr/pkg/logger"
@@ -42,8 +42,8 @@ type Server interface {
 type server struct {
 	api                API
 	config             ServerConfig
-	tracingSpec        config.TracingSpec
-	metricSpec         config.MetricSpec
+	tracingSpec        v1alpha1.TracingSpec
+	metricSpec         v1alpha1.MetricSpec
 	authenticator      auth.Authenticator
 	listener           net.Listener
 	srv                *grpc_go.Server
@@ -61,7 +61,7 @@ var apiServerLogger = logger.NewLogger("dapr.runtime.grpc.api")
 var internalServerLogger = logger.NewLogger("dapr.runtime.grpc.internal")
 
 // NewAPIServer returns a new user facing gRPC API server
-func NewAPIServer(api API, config ServerConfig, tracingSpec config.TracingSpec, metricSpec config.MetricSpec) Server {
+func NewAPIServer(api API, config ServerConfig, tracingSpec v1alpha1.TracingSpec, metricSpec v1alpha1.MetricSpec) Server {
 	return &server{
 		api:         api,
 		config:      config,
@@ -74,7 +74,7 @@ func NewAPIServer(api API, config ServerConfig, tracingSpec config.TracingSpec, 
 }
 
 // NewInternalServer returns a new gRPC server for Dapr to Dapr communications
-func NewInternalServer(api API, config ServerConfig, tracingSpec config.TracingSpec, metricSpec config.MetricSpec, authenticator auth.Authenticator) Server {
+func NewInternalServer(api API, config ServerConfig, tracingSpec v1alpha1.TracingSpec, metricSpec v1alpha1.MetricSpec, authenticator auth.Authenticator) Server {
 	return &server{
 		api:              api,
 		config:           config,

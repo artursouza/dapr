@@ -310,7 +310,7 @@ func TestHTTPTraceMiddleware(t *testing.T) {
 		ctx.Response.SetBodyRaw([]byte(responseBody))
 	}
 
-	rate := config.TracingSpec{SamplingRate: "1"}
+	rate := v1alpha1.TracingSpec{SamplingRate: "1"}
 	handler := HTTPTraceMiddleware(fakeHandler, "fakeAppID", rate)
 
 	t.Run("traceparent is given in request and sampling is enabled", func(t *testing.T) {

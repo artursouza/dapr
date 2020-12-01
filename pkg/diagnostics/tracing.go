@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dapr/dapr/pkg/config"
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	diag_utils "github.com/dapr/dapr/pkg/diagnostics/utils"
 	"go.opencensus.io/trace"
 	"go.opencensus.io/trace/tracestate"
@@ -221,7 +221,7 @@ func ConstructSubscriptionSpanAttributes(topic string) map[string]string {
 }
 
 // StartInternalCallbackSpan starts trace span for internal callback such as input bindings and pubsub subscription.
-func StartInternalCallbackSpan(spanName string, parent trace.SpanContext, spec config.TracingSpec) (context.Context, *trace.Span) {
+func StartInternalCallbackSpan(spanName string, parent trace.SpanContext, spec v1alpha1.TracingSpec) (context.Context, *trace.Span) {
 	traceEnabled := diag_utils.IsTracingEnabled(spec.SamplingRate)
 	ctx := context.Background()
 	if !traceEnabled {

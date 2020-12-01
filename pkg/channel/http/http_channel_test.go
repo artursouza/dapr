@@ -82,7 +82,7 @@ func TestInvokeMethod(t *testing.T) {
 		c := Channel{
 			baseAddress: server.URL,
 			client:      &fasthttp.Client{},
-			tracingSpec: config.TracingSpec{
+			tracingSpec: v1alpha1.TracingSpec{
 				SamplingRate: "0",
 			},
 		}
@@ -103,7 +103,7 @@ func TestInvokeMethod(t *testing.T) {
 		c := Channel{
 			baseAddress: server.URL,
 			client:      &fasthttp.Client{},
-			tracingSpec: config.TracingSpec{
+			tracingSpec: v1alpha1.TracingSpec{
 				SamplingRate: "1",
 			},
 		}
@@ -272,7 +272,7 @@ func TestContentType(t *testing.T) {
 
 func TestCreateChannel(t *testing.T) {
 	t.Run("ssl scheme", func(t *testing.T) {
-		ch, err := CreateLocalChannel(3000, 0, config.TracingSpec{}, true)
+		ch, err := CreateLocalChannel(3000, 0, v1alpha1.TracingSpec{}, true)
 		assert.NoError(t, err)
 
 		b := ch.GetBaseAddress()
@@ -280,7 +280,7 @@ func TestCreateChannel(t *testing.T) {
 	})
 
 	t.Run("non-ssl scheme", func(t *testing.T) {
-		ch, err := CreateLocalChannel(3000, 0, config.TracingSpec{}, false)
+		ch, err := CreateLocalChannel(3000, 0, v1alpha1.TracingSpec{}, false)
 		assert.NoError(t, err)
 
 		b := ch.GetBaseAddress()

@@ -6,7 +6,7 @@
 package http
 
 import (
-	"github.com/dapr/dapr/pkg/config"
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	"github.com/valyala/fasthttp"
 )
 
@@ -17,7 +17,7 @@ type Pipeline struct {
 	Handlers []Middleware
 }
 
-func BuildHTTPPipeline(spec config.PipelineSpec) (Pipeline, error) {
+func BuildHTTPPipeline(spec v1alpha1.PipelineSpec) (Pipeline, error) {
 	return Pipeline{}, nil
 }
 

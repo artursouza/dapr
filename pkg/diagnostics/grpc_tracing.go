@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dapr/dapr/pkg/config"
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	diag_utils "github.com/dapr/dapr/pkg/diagnostics/utils"
 	internalv1pb "github.com/dapr/dapr/pkg/proto/internals/v1"
 	runtimev1pb "github.com/dapr/dapr/pkg/proto/runtime/v1"
@@ -25,7 +25,7 @@ import (
 const grpcTraceContextKey = "grpc-trace-bin"
 
 // GRPCTraceUnaryServerInterceptor sets the trace context or starts the trace client span based on request
-func GRPCTraceUnaryServerInterceptor(appID string, spec config.TracingSpec) grpc.UnaryServerInterceptor {
+func GRPCTraceUnaryServerInterceptor(appID string, spec v1alpha1.TracingSpec) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		var span *trace.Span
 		spanName := info.FullMethod

@@ -116,7 +116,7 @@ func NewMockKubernetesStoreWithInitCallback(cb func()) secretstores.SecretStore 
 
 func TestNewRuntime(t *testing.T) {
 	// act
-	r := NewDaprRuntime(&Config{}, &config.Configuration{}, &config.AccessControlList{})
+	r := NewDaprRuntime(&Config{}, &v1alpha1.Configuration{}, &config.AccessControlList{})
 
 	// assert
 	assert.NotNil(t, r, "runtime must be initiated")
@@ -1777,7 +1777,7 @@ func NewTestDaprRuntimeWithProtocol(mode modes.DaprMode, protocol string, appPor
 		"",
 		false)
 
-	rt := NewDaprRuntime(testRuntimeConfig, &config.Configuration{}, &config.AccessControlList{})
+	rt := NewDaprRuntime(testRuntimeConfig, &v1alpha1.Configuration{}, &config.AccessControlList{})
 	return rt
 }
 
@@ -2109,7 +2109,7 @@ func (m *mockPublishPubSub) Close() error {
 
 func TestInitActors(t *testing.T) {
 	t.Run("missing namespace on kubernetes", func(t *testing.T) {
-		r := NewDaprRuntime(&Config{Mode: modes.KubernetesMode}, &config.Configuration{}, &config.AccessControlList{})
+		r := NewDaprRuntime(&Config{Mode: modes.KubernetesMode}, &v1alpha1.Configuration{}, &config.AccessControlList{})
 		r.namespace = ""
 		r.runtimeConfig.mtlsEnabled = true
 
@@ -2120,7 +2120,7 @@ func TestInitActors(t *testing.T) {
 
 func TestInitBindings(t *testing.T) {
 	t.Run("single input binding", func(t *testing.T) {
-		r := NewDaprRuntime(&Config{}, &config.Configuration{}, &config.AccessControlList{})
+		r := NewDaprRuntime(&Config{}, &v1alpha1.Configuration{}, &config.AccessControlList{})
 		r.bindingsRegistry.RegisterInputBindings(
 			bindings_loader.NewInput("testInputBinding", func() bindings.InputBinding {
 				return &daprt.MockBinding{}
@@ -2135,7 +2135,7 @@ func TestInitBindings(t *testing.T) {
 	})
 
 	t.Run("single output binding", func(t *testing.T) {
-		r := NewDaprRuntime(&Config{}, &config.Configuration{}, &config.AccessControlList{})
+		r := NewDaprRuntime(&Config{}, &v1alpha1.Configuration{}, &config.AccessControlList{})
 		r.bindingsRegistry.RegisterOutputBindings(
 			bindings_loader.NewOutput("testOutputBinding", func() bindings.OutputBinding {
 				return &daprt.MockBinding{}
@@ -2150,7 +2150,7 @@ func TestInitBindings(t *testing.T) {
 	})
 
 	t.Run("one input binding, one output binding", func(t *testing.T) {
-		r := NewDaprRuntime(&Config{}, &config.Configuration{}, &config.AccessControlList{})
+		r := NewDaprRuntime(&Config{}, &v1alpha1.Configuration{}, &config.AccessControlList{})
 		r.bindingsRegistry.RegisterInputBindings(
 			bindings_loader.NewInput("testinput", func() bindings.InputBinding {
 				return &daprt.MockBinding{}

@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	global_config "github.com/dapr/dapr/pkg/config"
 	"github.com/dapr/dapr/pkg/cors"
 	"github.com/dapr/dapr/pkg/grpc"
@@ -133,7 +134,7 @@ func FromFlags() (*DaprRuntime, error) {
 	runtimeConfig := NewRuntimeConfig(*appID, placementAddresses, *controlPlaneAddress, *allowedOrigins, *config, *componentsPath,
 		appPrtcl, *mode, daprHTTP, daprInternalGRPC, daprAPIGRPC, applicationPort, profPort, *enableProfiling, concurrency, *enableMTLS, *sentryAddress, *appSSL)
 
-	var globalConfig *global_config.Configuration
+	var globalConfig *v1alpha1.Configuration
 	var configErr error
 
 	if *enableMTLS {
