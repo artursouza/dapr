@@ -12,8 +12,10 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"time"
 
 	cors "github.com/AdhityaRamadhanus/fasthttpcors"
+	"github.com/cenkalti/backoff/v4"
 	routing "github.com/fasthttp/router"
 	"github.com/pkg/errors"
 	"github.com/valyala/fasthttp"
@@ -80,25 +82,37 @@ func (s *server) StartNonBlocking() error {
 
 	var listeners []net.Listener
 	var profilingListeners []net.Listener
-	if s.config.UnixDomainSocket != "" {
-		socket := fmt.Sprintf("/%s/dapr-%s-http.socket", s.config.UnixDomainSocket, s.config.AppID)
-		l, err := net.Listen("unix", socket)
-		if err != nil {
-			return err
-		}
-		listeners = append(listeners, l)
-	} else {
-		for _, apiListenAddress := range s.config.APIListenAddresses {
-			l, err := net.Listen("tcp", fmt.Sprintf("%s:%v", apiListenAddress, s.config.Port))
+
+	b := backoff.NewExponentialBackOff()
+	b.MaxElapsedTime = time.Minute
+	err := backoff.Retry(func() error {
+		if s.config.UnixDomainSocket != "" {
+			socket := fmt.Sprintf("/%s/dapr-%s-http.socket", s.config.UnixDomainSocket, s.config.AppID)
+			l, err := net.Listen("unix", socket)
 			if err != nil {
-				log.Warnf("Failed to listen on %v:%v with error: %v", apiListenAddress, s.config.Port, err)
-			} else {
-				listeners = append(listeners, l)
+				return err
+			}
+			listeners = append(listeners, l)
+		} else {
+			for _, apiListenAddress := range s.config.APIListenAddresses {
+				l, err := net.Listen("tcp", fmt.Sprintf("%s:%v", apiListenAddress, s.config.Port))
+				if err != nil {
+					log.Warnf("Failed to listen on %v:%v with error: %v", apiListenAddress, s.config.Port, err)
+				} else {
+					listeners = append(listeners, l)
+				}
 			}
 		}
-	}
-	if len(listeners) == 0 {
-		return errors.Errorf("could not listen on any endpoint")
+
+		if len(listeners) == 0 {
+			return errors.Errorf("could not listen on any endpoint")
+		}
+
+		return nil
+	}, b)
+
+	if err != nil {
+		return err
 	}
 
 	s.listeners = listeners
