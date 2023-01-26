@@ -268,7 +268,7 @@ jobs:
       DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
       HELMVER: v3.7.2
       SKIP_GHCR: 'true'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Set up Helm ${{ env.HELMVER }}
         uses: azure/setup-helm@v1
@@ -377,6 +377,8 @@ jobs:
             --prerelease true \
             ${RELEASE_ARTIFACT[*]}
         shell: bash
+      - name: Show Docker CLI version
+        run: docker version
       - name: Docker Hub Login
         uses: docker/login-action@v1
         if: matrix.target_os != 'darwin' && env.DOCKER_REGISTRY != ''
