@@ -208,14 +208,24 @@ jobs:
           DAPR_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
           TARGET_OS: ${{ matrix.target_os }}
           TARGET_ARCH: ${{ matrix.target_arch }}
+          DAPR_TAG: ${{ env.REL_VERSION }}
         run: |
           echo "Build Docker images and push to Docker Hub..."
-          DAPR_TAG=${{ env.REL_VERSION }} make docker-push
-
+          make docker-push
+        shell: bash
+      - name: Build and push Docker Mariner images to Docker Hub
+        if: matrix.target_os != 'darwin' && github.event_name != 'pull_request' && env.DOCKER_REGISTRY_ID != '' && env.TARGET_OS == 'linux' && env.TARGET_ARCH != 'arm'
+        env:
+          DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
+          DAPR_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+          TARGET_OS: ${{ matrix.target_os }}
+          TARGET_ARCH: ${{ matrix.target_arch }}
+          DAPR_TAG: "${{ env.REL_VERSION }}-mariner"
+          DOCKERFILE: Dockerfile-mariner
+        run: |
+          echo "Build Docker Mariner images and push to Docker Hub..."
           # Mariner images are built only on linux/amd64 and linux/arm64
-          if [ "$TARGET_OS" = "linux" ] && [ "$TARGET_ARCH" != "arm" ]; then
-            DOCKERFILE=Dockerfile-mariner DAPR_TAG="${{ env.REL_VERSION }}-mariner" make docker-push
-          fi
+          make docker-push
         shell: bash
       - name: Build and push Docker images to GHCR
         if: matrix.target_os != 'darwin' && github.event_name != 'pull_request' && env.SKIP_GHCR != 'true'
@@ -223,14 +233,23 @@ jobs:
           DAPR_REGISTRY: ghcr.io/${{ env.REPO_OWNER }}
           TARGET_OS: ${{ matrix.target_os }}
           TARGET_ARCH: ${{ matrix.target_arch }}
+          DAPR_TAG: ${{ env.REL_VERSION }}
         run: |
           echo "Build Docker images and push to GHCR..."
-          DAPR_TAG=${{ env.REL_VERSION }} make docker-push
-
+          make docker-push
+        shell: bash
+      - name: Build and push Docker Mariner images to GHCR
+        if: matrix.target_os != 'darwin' && github.event_name != 'pull_request' && env.SKIP_GHCR != 'true' && env.TARGET_OS == 'linux' && env.TARGET_ARCH != 'arm'
+        env:
+          DAPR_REGISTRY: ghcr.io/${{ env.REPO_OWNER }}
+          TARGET_OS: ${{ matrix.target_os }}
+          TARGET_ARCH: ${{ matrix.target_arch }}
+          DOCKERFILE: Dockerfile-mariner
+          DAPR_TAG: "${{ env.REL_VERSION }}-mariner"
+        run: |
+          echo "Build Docker Mariner images and push to GHCR..."
           # Mariner images are built only on linux/amd64 and linux/arm64
-          if [ "$TARGET_OS" = "linux" ] && [ "$TARGET_ARCH" != "arm" ]; then
-            DOCKERFILE=Dockerfile-mariner DAPR_TAG="${{ env.REL_VERSION }}-mariner" make docker-push
-          fi
+          make docker-push
         shell: bash
       - name: Upload test results
         if: always() && matrix.target_arch == 'amd64'
@@ -376,33 +395,46 @@ jobs:
         env:
           DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
           DAPR_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+          DAPR_TAG: ${{ env.REL_VERSION }}
         run: |
           echo "Build Docker multiarch manifest and push to Docker Hub"
-          DAPR_TAG="${{ env.REL_VERSION }}" make docker-publish
-
-          # Publish the `-mariner` tag
+          make docker-publish
+        shell: bash
+      - name: Build and push Docker Mariner multiarch manifest to Docker Hub
+        if: matrix.target_os != 'darwin' && env.DOCKER_REGISTRY_ID != ''
+        env:
+          DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
+          DAPR_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+          DOCKER_MULTI_ARCH: "linux-amd64 linux-arm64"
+          DAPR_TAG: "${{ env.REL_VERSION }}-mariner"
+          LATEST_TAG: latest-mariner
+        run: |
+          echo "Build Docker multiarch manifest and push to Docker Hub"
           # Mariner images are built only on linux/amd64 and linux/arm64
           # Also, these use the "latest-mariner" tag if it's the latest
-          DOCKER_MULTI_ARCH="linux-amd64 linux-arm64" \
-          DAPR_TAG="${{ env.REL_VERSION }}-mariner" \
-          LATEST_TAG=latest-mariner \
-            make docker-publish
+          make docker-publish
         shell: bash
       - name: Build and push Docker multiarch manifest to GHCR
         if: matrix.target_os != 'darwin' && env.SKIP_GHCR != 'true'
         env:
            DAPR_REGISTRY: ghcr.io/${{ env.REPO_OWNER }}
+           DAPR_TAG: ${{ env.REL_VERSION }}
         run: |
           echo "Build Docker multiarch manifest and push to GHCR"
-          DAPR_TAG="${{ env.REL_VERSION }}" make docker-publish
-
-          # Publish the `-mariner` tag
+          make docker-publish
+        shell: bash
+      - name: Build and push Docker Mariner multiarch manifest to GHCR
+        if: matrix.target_os != 'darwin' && env.SKIP_GHCR != 'true'
+        env:
+          DAPR_REGISTRY: ghcr.io/${{ env.REPO_OWNER }}
+          DOCKER_MULTI_ARCH: "linux-amd64 linux-arm64"
+          DAPR_TAG: "${{ env.REL_VERSION }}-mariner"
+          LATEST_TAG: latest-mariner
+        run: |
+          echo "Build Docker multiarch manifest and push to Docker Hub"
           # Mariner images are built only on linux/amd64 and linux/arm64
           # Also, these use the "latest-mariner" tag if it's the latest
-          DOCKER_MULTI_ARCH="linux-amd64 linux-arm64" \
-          DAPR_TAG="${{ env.REL_VERSION }}-mariner" \
-          LATEST_TAG=latest-mariner \
-            make docker-publish
+          make docker-publish
         shell: bash
       - name: Save release version
         run: |
