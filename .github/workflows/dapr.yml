@@ -216,7 +216,7 @@ jobs:
           fi
         shell: bash
       - name: Build and push Docker images to GHCR
-        if: matrix.target_os != 'darwin' && github.event_name != 'pull_request'
+        if: matrix.target_os != 'darwin' && github.event_name != 'pull_request' && env.SKIP_GHCR != 'true'
         env:
           DAPR_REGISTRY: ghcr.io/${{ env.REPO_OWNER }}
           TARGET_OS: ${{ matrix.target_os }}
@@ -363,7 +363,7 @@ jobs:
           password: ${{ secrets.DOCKER_REGISTRY_PASS }}
       - name: GitHub Container Registry login
         uses: docker/login-action@v1
-        if: matrix.target_os != 'darwin'
+        if: matrix.target_os != 'darwin' && env.SKIP_GHCR != 'true'
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -386,7 +386,7 @@ jobs:
             make docker-publish
         shell: bash
       - name: Build and push Docker multiarch manifest to GHCR
-        if: matrix.target_os != 'darwin'
+        if: matrix.target_os != 'darwin' && env.SKIP_GHCR != 'true'
         env:
            DAPR_REGISTRY: ghcr.io/${{ env.REPO_OWNER }}
         run: |
