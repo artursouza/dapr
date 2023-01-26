@@ -17,7 +17,7 @@ require (
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.2
-	github.com/google/cel-go v0.12.5
+	github.com/google/cel-go v0.12.6
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
@@ -59,12 +59,12 @@ require (
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.26.0
-	k8s.io/apiextensions-apiserver v0.26.0
-	k8s.io/apimachinery v0.26.0
+	k8s.io/api v0.26.1
+	k8s.io/apiextensions-apiserver v0.26.1
+	k8s.io/apimachinery v0.26.1
 	k8s.io/cli-runtime v0.25.3
-	k8s.io/client-go v0.26.0
-	k8s.io/code-generator v0.26.0
+	k8s.io/client-go v0.26.1
+	k8s.io/code-generator v0.26.1
 	k8s.io/klog v1.0.0
 	k8s.io/metrics v0.25.3
 	sigs.k8s.io/controller-runtime v0.14.1
@@ -399,7 +399,7 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/component-base v0.26.0 // indirect
+	k8s.io/component-base v0.26.1 // indirect
 	k8s.io/gengo v0.0.0-20220902162205-c0856e24416d // indirect
 	k8s.io/klog/v2 v2.80.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280 // indirect
