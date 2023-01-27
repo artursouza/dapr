@@ -270,6 +270,9 @@ jobs:
       SKIP_GHCR: 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: Install latest Docker CLI
+        uses: docker-practice/actions-setup-docker@v1
+        timeout-minutes: 12
       - name: Set up Helm ${{ env.HELMVER }}
         uses: azure/setup-helm@v1
         with:
