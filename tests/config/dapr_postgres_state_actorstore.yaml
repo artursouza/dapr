@@ -45,3 +45,5 @@ scopes:
 - perf-actor-type
 - workflowsapp
 - perf-workflowsapp
+- chaos-actor-invoke-service
+- chaos-actor-invoke-service

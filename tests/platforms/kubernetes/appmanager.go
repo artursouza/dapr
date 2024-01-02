@@ -40,8 +40,9 @@ const (
 	// ContainerLogDefaultPath.
 	ContainerLogDefaultPath = "./container_logs"
 
+	// The PollInterval can impact stability of tests since Azure can throttle API calls.
 	// PollInterval is how frequently e2e tests will poll for updates.
-	PollInterval = 1 * time.Second
+	PollInterval = 2 * time.Second
 	// PollTimeout is how long e2e tests will wait for resource updates when polling.
 	PollTimeout = 8 * time.Minute
 

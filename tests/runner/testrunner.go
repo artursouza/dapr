@@ -49,6 +49,7 @@ type PlatformInterface interface {
 	AcquireAppExternalURL(name string) string
 	GetAppHostDetails(name string) (string, string, error)
 	Restart(name string) error
+	RestartApps(names ...string) error
 	Scale(name string, replicas int32) error
 	PortForwardToApp(appName string, targetPort ...int) ([]int, error)
 	SetAppEnv(appName, key, value string) error
@@ -58,6 +59,7 @@ type PlatformInterface interface {
 	GetConfiguration(name string) (*configurationv1alpha1.Configuration, error)
 	GetService(name string) (*corev1.Service, error)
 	LoadTest(loadtester LoadTester) error
+	KillRandomInstance(name string) error
 }
 
 // AppUsage holds the CPU and Memory information for the application.

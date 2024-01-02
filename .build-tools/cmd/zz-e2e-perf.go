@@ -264,10 +264,10 @@ func (c *cmdE2EPerf) getDestImage() string {
 
 // Returns the directory where the app is stored
 func (c *cmdE2EPerf) getAppDir() string {
-	if c.cmdType == "perf" {
-		return filepath.Join(c.flags.AppDir, "perf")
-	} else {
+	if c.cmdType == "e2e" {
 		return c.flags.AppDir
+	} else {
+		return filepath.Join(c.flags.AppDir, c.cmdType)
 	}
 }
 
@@ -310,10 +310,10 @@ func (c *cmdE2EPerf) buildDockerImage(cachedImage string) error {
 		}
 
 		// Use the "shared" Dockerfile
-		if c.cmdType == "perf" {
-			dockerfile = filepath.Join(appDir, "..", "Dockerfile")
-		} else {
+		if c.cmdType == "e2e" {
 			dockerfile = filepath.Join(appDir, c.flags.Dockerfile)
+		} else {
+			dockerfile = filepath.Join(appDir, "..", "Dockerfile")
 		}
 	}
 

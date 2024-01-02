@@ -81,6 +81,11 @@ func (m *MockPlatform) Restart(name string) error {
 	return args.Error(0)
 }
 
+func (m *MockPlatform) RestartApps(names ...string) error {
+	args := m.Called(names)
+	return args.Error(0)
+}
+
 func (m *MockPlatform) PortForwardToApp(appName string, targetPort ...int) ([]int, error) {
 	args := m.Called(appName)
 	return []int{}, args.Error(0)
@@ -118,6 +123,11 @@ func (m *MockPlatform) LoadTest(loadtester LoadTester) error {
 
 func (m *MockPlatform) AddSecrets(secrets []kube.SecretDescription) error {
 	args := m.Called(secrets)
+	return args.Error(0)
+}
+
+func (m *MockPlatform) KillRandomInstance(name string) error {
+	args := m.Called(name)
 	return args.Error(0)
 }
 
