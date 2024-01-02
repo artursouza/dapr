@@ -40,17 +40,18 @@ const (
 	defaultActorType                = "testactorfeatures"                   // Actor type must be unique per test app.
 	actorTypeEnvName                = "TEST_APP_ACTOR_TYPE"                 // To set to change actor type.
 	actorRemindersPartitionsEnvName = "TEST_APP_ACTOR_REMINDERS_PARTITIONS" // To set actor type partition count.
+	actorMethodWaitSecondsEnvName   = "TEST_APP_ACTOR_METHOD_WAIT_SECONDS"  // Time to wait in actor method.
 	actorIdleTimeout                = "1h"
 	actorScanInterval               = "30s"
 	drainOngoingCallTimeout         = "30s"
 	drainRebalancedActors           = true
-	secondsToWaitInMethod           = 5
 )
 
 var (
-	appPort      = 3000
-	daprHTTPPort = 3500
-	httpClient   = utils.NewHTTPClient()
+	appPort               = 3000
+	daprHTTPPort          = 3500
+	secondsToWaitInMethod = 5
+	httpClient            = utils.NewHTTPClient()
 )
 
 func init() {
@@ -61,6 +62,10 @@ func init() {
 	p = os.Getenv("PORT")
 	if p != "" && p != "0" {
 		appPort, _ = strconv.Atoi(p)
+	}
+	p = os.Getenv("TEST_APP_ACTOR_METHOD_WAIT_SECONDS")
+	if p != "" {
+		secondsToWaitInMethod, _ = strconv.Atoi(p)
 	}
 }
 
@@ -291,7 +296,7 @@ func actorMethodHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// Sleep for all calls, except timer and reminder.
 		if !reminderOrTimer {
-			time.Sleep(secondsToWaitInMethod * time.Second)
+			time.Sleep(time.Second * time.Duration(secondsToWaitInMethod))
 		}
 		data, err = json.Marshal(response{
 			actorType,

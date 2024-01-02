@@ -19,10 +19,12 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	configurationv1alpha1 "github.com/dapr/dapr/pkg/apis/configuration/v1alpha1"
 	kube "github.com/dapr/dapr/tests/platforms/kubernetes"
+	"github.com/google/uuid"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -347,17 +349,44 @@ func (c *KubeTestPlatform) Restart(name string) error {
 	// To minic the restart behavior, scale to 0 and then scale to the original replicas.
 	app := c.AppResources.FindActiveResource(name)
 	m := app.(*kube.AppManager)
-	originalReplicas := m.App().Replicas
 
-	if err := c.Scale(name, 0); err != nil {
+	if err := c.SetAppEnv(name, "DAPR_TEST_RESTART_ID", uuid.NewString()); err != nil {
 		return err
 	}
-
-	if err := c.Scale(name, originalReplicas); err != nil {
-		return err
-	}
-
 	m.StreamContainerLogs()
+
+	return nil
+}
+
+// Restart restarts all instances for all apps, in parallel.
+func (c *KubeTestPlatform) RestartApps(names ...string) error {
+	var wg sync.WaitGroup
+	errCh := make(chan error, len(names))
+
+	for _, name := range names {
+		wg.Add(1)
+		go func(s string) {
+			defer wg.Done()
+			err := c.Restart(s)
+			if err != nil {
+				errCh <- err
+			}
+		}(name)
+	}
+
+	go func() {
+		wg.Wait()
+		close(errCh)
+	}()
+
+	var errorsSlice []error
+	for err := range errCh {
+		errorsSlice = append(errorsSlice, err)
+	}
+
+	if len(errorsSlice) > 0 {
+		return fmt.Errorf("multiple errors when restarting apps: %v", errorsSlice)
+	}
 
 	return nil
 }

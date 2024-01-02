@@ -49,6 +49,7 @@ type PlatformInterface interface {
 	AcquireAppExternalURL(name string) string
 	GetAppHostDetails(name string) (string, string, error)
 	Restart(name string) error
+	RestartApps(names ...string) error
 	Scale(name string, replicas int32) error
 	PortForwardToApp(appName string, targetPort ...int) ([]int, error)
 	SetAppEnv(appName, key, value string) error

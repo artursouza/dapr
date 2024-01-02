@@ -16,6 +16,7 @@ package utils
 import (
 	"bytes"
 	"crypto/tls"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -82,6 +83,10 @@ func NewHTTPClient(allowHTTP2 bool) *http.Client {
 // HTTPGetNTimes calls the url n times and returns the first success
 // or last error.
 func HTTPGetNTimes(url string, n int) ([]byte, error) {
+	if httpClient == nil {
+		return nil, fmt.Errorf("nil httpClient")
+	}
+
 	var res []byte
 	var err error
 	for i := n - 1; i >= 0; i-- {

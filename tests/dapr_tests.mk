@@ -60,6 +60,8 @@ workflowsapp \
 # PERFORMANCE test app list
 PERF_TEST_APPS=actorfeatures actorjava tester service_invocation_http service_invocation_grpc actor-activation-locker k6-custom pubsub_subscribe_http configuration
 
+CHAOS_TEST_APPS=actorinvoke actorinvokeloop errorcollector
+
 # E2E test app root directory
 E2E_TESTAPP_DIR=./tests/apps
 
@@ -83,6 +85,9 @@ actor_id_scale \
 actor_type_scale \
 configuration \
 pubsub_subscribe_http \
+
+# Chaos tests
+CHAOS_TESTS=actor_invoke_with_sidecar_restarts
 
 KUBECTL=kubectl
 
@@ -239,6 +244,42 @@ build-push-perf-app-$(1): check-e2e-env check-e2e-cache
 		--cache-registry "$(DAPR_CACHE_REGISTRY)"
 endef
 
+define genChaosTestAppImageBuild
+.PHONY: build-chaos-app-$(1)
+build-chaos-app-$(1): check-e2e-env
+	$(RUN_BUILD_TOOLS) chaos build \
+		--name "$(1)" \
+		--appdir "../$(E2E_TESTAPP_DIR)" \
+		--dest-registry "$(DAPR_TEST_REGISTRY)" \
+		--dest-tag "$(DAPR_TEST_TAG)" \
+		--target-os "$(TARGET_OS)" \
+		--target-arch "$(TARGET_ARCH)" \
+		--cache-registry "$(DAPR_CACHE_REGISTRY)"
+endef
+
+# Generate chaos app image build targets
+$(foreach ITEM,$(CHAOS_TEST_APPS),$(eval $(call genChaosTestAppImageBuild,$(ITEM))))
+
+define genChaosAppImagePush
+.PHONY: push-chaos-app-$(1)
+push-chaos-app-$(1): check-e2e-env
+	$(RUN_BUILD_TOOLS) chaos push \
+		--name "$(1)" \
+		--dest-registry "$(DAPR_TEST_REGISTRY)" \
+		--dest-tag "$(DAPR_TEST_TAG)"
+endef
+
+define genChaosAppImageBuildPush
+.PHONY: build-push-chaos-app-$(1)
+build-push-chaos-app-$(1): check-e2e-env check-e2e-cache
+	$(RUN_BUILD_TOOLS) chaos build-and-push \
+		--name "$(1)" \
+		--appdir "../$(E2E_TESTAPP_DIR)" \
+		--dest-registry "$(DAPR_TEST_REGISTRY)" \
+		--dest-tag "$(DAPR_TEST_TAG)" \
+		--cache-registry "$(DAPR_CACHE_REGISTRY)"
+endef
+
 # Generate perf app image build-push targets
 $(foreach ITEM,$(PERF_TEST_APPS),$(eval $(call genPerfAppImageBuildPush,$(ITEM))))
 
@@ -267,6 +308,11 @@ $(foreach ITEM,$(PERF_TEST_APPS),$(eval $(call genPerfAppImagePush,$(ITEM))))
 # Generate perf app image kind push targets
 $(foreach ITEM,$(PERF_TEST_APPS),$(eval $(call genPerfAppImageKindPush,$(ITEM))))
 
+# Generate chaos app image push targets
+$(foreach ITEM,$(CHAOS_TEST_APPS),$(eval $(call genChaosAppImagePush,$(ITEM))))
+# Generate chaos app image kind push targets
+$(foreach ITEM,$(CHAOS_TEST_APPS),$(eval $(call genChaosAppImageKindPush,$(ITEM))))
+
 # Enumerate test app build targets
 BUILD_E2E_APPS_TARGETS:=$(foreach ITEM,$(E2E_TEST_APPS),build-e2e-app-$(ITEM))
 # Enumerate test app push targets
@@ -284,6 +330,15 @@ PUSH_PERF_APPS_TARGETS:=$(foreach ITEM,$(PERF_TEST_APPS),push-perf-app-$(ITEM))
 BUILD_PUSH_PERF_APPS_TARGETS:=$(foreach ITEM,$(PERF_TEST_APPS),build-push-perf-app-$(ITEM))
 # Enumerate perf app kind push targets
 PUSH_KIND_PERF_APPS_TARGETS:=$(foreach ITEM,$(PERF_TEST_APPS),push-kind-perf-app-$(ITEM))
+
+# Enumerate test app build targets
+BUILD_CHAOS_APPS_TARGETS:=$(foreach ITEM,$(CHAOS_TEST_APPS),build-chaos-app-$(ITEM))
+# Enumerate chaos app push targets
+PUSH_CHAOS_APPS_TARGETS:=$(foreach ITEM,$(CHAOS_TEST_APPS),push-chaos-app-$(ITEM))
+# Enumerate chaos app build-push targets
+BUILD_PUSH_CHAOS_APPS_TARGETS:=$(foreach ITEM,$(CHAOS_TEST_APPS),build-push-chaos-app-$(ITEM))
+# Enumerate chaos app kind push targets
+PUSH_KIND_CHAOS_APPS_TARGETS:=$(foreach ITEM,$(CHAOS_TEST_APPS),push-kind-chaos-app-$(ITEM))
 
 # build test app image
 build-e2e-app-all: $(BUILD_E2E_APPS_TARGETS)
@@ -310,6 +365,19 @@ build-push-perf-app-all: $(BUILD_PUSH_PERF_APPS_TARGETS)
 
 # push perf app image to kind cluster
 push-kind-perf-app-all: $(PUSH_KIND_PERF_APPS_TARGETS)
+
+# build chaos app images
+build-chaos-app-all: $(BUILD_CHAOS_APPS_TARGETS)
+
+# push chaos app image to the registry
+push-chaos-app-all: $(PUSH_CHAOS_APPS_TARGETS)
+
+# build and push chaos app image to the registry
+# can be faster because it uses cache and copies images directly
+build-push-chaos-app-all: $(BUILD_PUSH_CHAOS_APPS_TARGETS)
+
+# push chaos app image to kind cluster
+push-kind-chaos-app-all: $(PUSH_KIND_CHAOS_APPS_TARGETS)
 
 .PHONY: test-deps
 test-deps:
@@ -412,6 +480,46 @@ test-perf-pubsub-subscribe-http-components: check-e2e-env test-deps
 			-- \
 				-timeout 3h -p 1 -count=1 -v -tags=perf ./tests/perf/pubsub_subscribe_http/...
 	jq -r .Output $(TEST_OUTPUT_FILE_PREFIX)_perf_$(1).json | strings
+
+
+# start all chaos tests
+test-chaos-all: check-e2e-env test-deps
+	# Note: use env variable DAPR_CHAOS_TEST to pick one chaos test to run.
+ifeq ($(DAPR_CHAOS_TEST),)
+	DAPR_CONTAINER_LOG_PATH=$(DAPR_CONTAINER_LOG_PATH) \
+	DAPR_TEST_LOG_PATH=$(DAPR_TEST_LOG_PATH) \
+	GOOS=$(TARGET_OS_LOCAL) \
+	DAPR_TEST_NAMESPACE=$(DAPR_TEST_NAMESPACE) \
+	DAPR_TEST_TAG=$(DAPR_TEST_TAG) \
+	DAPR_TEST_REGISTRY=$(DAPR_TEST_REGISTRY) \
+	DAPR_TEST_MINIKUBE_IP=$(MINIKUBE_NODE_IP) \
+	NO_API_LOGGING=true \
+		gotestsum \
+		--jsonfile $(TEST_OUTPUT_FILE_PREFIX)_chaos.json \
+		--junitfile $(TEST_OUTPUT_FILE_PREFIX)_chaos.xml \
+		--format standard-quiet \
+		-- \
+			-timeout 1h -p 1 -count=1 -v -tags=chaos ./tests/chaos/...
+	jq -r .Output $(TEST_OUTPUT_FILE_PREFIX)_chaos.json | strings
+else
+	for app in $(DAPR_CHAOS_TEST); do \
+		DAPR_CONTAINER_LOG_PATH=$(DAPR_CONTAINER_LOG_PATH) \
+		DAPR_TEST_LOG_PATH=$(DAPR_TEST_LOG_PATH) \
+		GOOS=$(TARGET_OS_LOCAL) \
+		DAPR_TEST_NAMESPACE=$(DAPR_TEST_NAMESPACE) \
+		DAPR_TEST_TAG=$(DAPR_TEST_TAG) \
+		DAPR_TEST_REGISTRY=$(DAPR_TEST_REGISTRY) \
+		DAPR_TEST_MINIKUBE_IP=$(MINIKUBE_NODE_IP) \
+		NO_API_LOGGING=true \
+			gotestsum \
+			--jsonfile $(TEST_OUTPUT_FILE_PREFIX)_chaos.json \
+			--junitfile $(TEST_OUTPUT_FILE_PREFIX)_chaos.xml \
+			--format standard-quiet \
+			-- \
+				-timeout 1h -p 1 -count=1 -v -tags=chaos ./tests/chaos/$$app... || exit -1 ; \
+		jq -r .Output $(TEST_OUTPUT_FILE_PREFIX)_chaos.json | strings ; \
+	done
+endif
 
 # add required helm repo
 setup-helm-init:

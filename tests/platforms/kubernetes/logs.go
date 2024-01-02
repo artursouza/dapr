@@ -19,8 +19,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -41,6 +43,23 @@ func init() {
 
 // StreamContainerLogsToDisk streams all containers logs for the given selector to a given disk directory.
 func StreamContainerLogsToDisk(ctx context.Context, appName string, podClient v1.PodInterface) error {
+	// Skipping logs is important for tests that to many pods
+	p := os.Getenv("DAPR_TEST_LOG_STREAM_SAMPLE_PERCENTAGE")
+	if p != "" {
+		percent, err := strconv.Atoi(p)
+		if err == nil {
+			if percent <= 0 {
+				return nil
+			}
+
+			if percent < 100 {
+				if rand.Intn(100) >= percent {
+					return nil
+				}
+			}
+		}
+	}
+
 	listCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	podList, err := podClient.List(listCtx, metav1.ListOptions{
 		LabelSelector: fmt.Sprintf("%s=%s", TestAppLabelKey, appName),
