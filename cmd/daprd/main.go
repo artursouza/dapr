@@ -120,60 +120,68 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = concurrency.NewRunnerManager(
-		secProvider.Run,
-		func(ctx context.Context) error {
-			sec, serr := secProvider.Handler(ctx)
-			if serr != nil {
-				return serr
-			}
+	for {
+		err = concurrency.NewRunnerManager(
+			secProvider.Run,
+			func(ctx context.Context) error {
+				sec, serr := secProvider.Handler(ctx)
+				if serr != nil {
+					return serr
+				}
 
-			rt, rerr := runtime.FromConfig(ctx, &runtime.Config{
-				AppID:                        opts.AppID,
-				PlacementServiceHostAddr:     opts.PlacementServiceHostAddr,
-				AllowedOrigins:               opts.AllowedOrigins,
-				ResourcesPath:                opts.ResourcesPath,
-				ControlPlaneAddress:          opts.ControlPlaneAddress,
-				AppProtocol:                  opts.AppProtocol,
-				Mode:                         opts.Mode,
-				DaprHTTPPort:                 opts.DaprHTTPPort,
-				DaprInternalGRPCPort:         opts.DaprInternalGRPCPort,
-				DaprAPIGRPCPort:              opts.DaprAPIGRPCPort,
-				DaprAPIListenAddresses:       opts.DaprAPIListenAddresses,
-				DaprPublicPort:               opts.DaprPublicPort,
-				ApplicationPort:              opts.AppPort,
-				ProfilePort:                  opts.ProfilePort,
-				EnableProfiling:              opts.EnableProfiling,
-				AppMaxConcurrency:            opts.AppMaxConcurrency,
-				EnableMTLS:                   opts.EnableMTLS,
-				SentryAddress:                opts.SentryAddress,
-				DaprHTTPMaxRequestSize:       opts.DaprHTTPMaxRequestSize,
-				UnixDomainSocket:             opts.UnixDomainSocket,
-				DaprHTTPReadBufferSize:       opts.DaprHTTPReadBufferSize,
-				DaprGracefulShutdownSeconds:  opts.DaprGracefulShutdownSeconds,
-				DisableBuiltinK8sSecretStore: opts.DisableBuiltinK8sSecretStore,
-				EnableAppHealthCheck:         opts.EnableAppHealthCheck,
-				AppHealthCheckPath:           opts.AppHealthCheckPath,
-				AppHealthProbeInterval:       opts.AppHealthProbeInterval,
-				AppHealthProbeTimeout:        opts.AppHealthProbeTimeout,
-				AppHealthThreshold:           opts.AppHealthThreshold,
-				AppChannelAddress:            opts.AppChannelAddress,
-				EnableAPILogging:             opts.EnableAPILogging,
-				Config:                       opts.Config,
-				Metrics:                      opts.Metrics,
-				AppSSL:                       opts.AppSSL,
-				ComponentsPath:               opts.ComponentsPath,
-				Registry:                     reg,
-				Security:                     sec,
-			})
-			if rerr != nil {
-				return rerr
-			}
+				rt, rerr := runtime.FromConfig(ctx, &runtime.Config{
+					AppID:                        opts.AppID,
+					PlacementServiceHostAddr:     opts.PlacementServiceHostAddr,
+					AllowedOrigins:               opts.AllowedOrigins,
+					ResourcesPath:                opts.ResourcesPath,
+					ControlPlaneAddress:          opts.ControlPlaneAddress,
+					AppProtocol:                  opts.AppProtocol,
+					Mode:                         opts.Mode,
+					DaprHTTPPort:                 opts.DaprHTTPPort,
+					DaprInternalGRPCPort:         opts.DaprInternalGRPCPort,
+					DaprAPIGRPCPort:              opts.DaprAPIGRPCPort,
+					DaprAPIListenAddresses:       opts.DaprAPIListenAddresses,
+					DaprPublicPort:               opts.DaprPublicPort,
+					ApplicationPort:              opts.AppPort,
+					ProfilePort:                  opts.ProfilePort,
+					EnableProfiling:              opts.EnableProfiling,
+					AppMaxConcurrency:            opts.AppMaxConcurrency,
+					EnableMTLS:                   opts.EnableMTLS,
+					SentryAddress:                opts.SentryAddress,
+					DaprHTTPMaxRequestSize:       opts.DaprHTTPMaxRequestSize,
+					UnixDomainSocket:             opts.UnixDomainSocket,
+					DaprHTTPReadBufferSize:       opts.DaprHTTPReadBufferSize,
+					DaprGracefulShutdownSeconds:  opts.DaprGracefulShutdownSeconds,
+					DisableBuiltinK8sSecretStore: opts.DisableBuiltinK8sSecretStore,
+					EnableAppHealthCheck:         opts.EnableAppHealthCheck,
+					AppHealthCheckPath:           opts.AppHealthCheckPath,
+					AppHealthProbeInterval:       opts.AppHealthProbeInterval,
+					AppHealthProbeTimeout:        opts.AppHealthProbeTimeout,
+					AppHealthThreshold:           opts.AppHealthThreshold,
+					AppChannelAddress:            opts.AppChannelAddress,
+					EnableAPILogging:             opts.EnableAPILogging,
+					Config:                       opts.Config,
+					Metrics:                      opts.Metrics,
+					AppSSL:                       opts.AppSSL,
+					ComponentsPath:               opts.ComponentsPath,
+					Registry:                     reg,
+					Security:                     sec,
+				})
+				if rerr != nil {
+					return rerr
+				}
 
-			return rt.Run(ctx)
-		},
-	).Run(ctx)
-	if err != nil {
-		log.Fatalf("Fatal error from runtime: %s", err)
+				return rt.Run(ctx)
+			},
+		).Run(ctx)
+
+		if err != nil {
+			if !opts.EnableSelfHealing {
+				log.Fatalf("Fatal error from runtime: %s", err)
+			} else {
+				log.Warnf("Runtime self-healing triggered due to error: %s", err)
+				ctx.Done()
+			}
+		}
 	}
 }
