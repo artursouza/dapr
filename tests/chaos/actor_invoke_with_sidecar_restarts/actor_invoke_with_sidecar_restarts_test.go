@@ -34,9 +34,9 @@ import (
 const (
 	numHealthChecks          = 60 // Number of times to check for endpoint health per app.
 	serviceApplicationName   = "chaos-actor-invoke-service"
-	serviceReplicaCount      = 30
+	serviceReplicaCount      = 20
 	clientApplicationName    = "chaos-actor-invoke-client"
-	clientReplicaCount       = 10
+	clientReplicaCount       = 5
 	collectorApplicationName = "chaos-error-collector"
 
 	numRestarts              = 30                                     // Number of times to restart sidecar before testing invocation.
@@ -178,53 +178,53 @@ func TestActorInvokeWithSidecarRestart(t *testing.T) {
 		require.Failf(t, "There are %s errors collected in the cluster, last: %s", strconv.Itoa(globalErrorCount), globalErrors[globalErrorCount-1].Message)
 	}
 
-	// In the background, kill random placement service instances
-	go func() {
-		for iteration := 0; iteration < numRestarts; iteration++ {
-			errp := tr.Platform.KillRandomInstance("dapr-placement-server")
-			require.NoError(t, errp)
-
-			sleepInSeconds := 10 + rand.Intn(5)
-			time.Sleep(time.Duration(sleepInSeconds) * time.Second)
-		}
-	}()
-
 	// Now, restart apps a few times, except error collector app.
 	for iteration := 0; iteration < numRestarts; iteration++ {
+		// In the background, kill random placement service instances.
+		go func() {
+			for iteration := 0; iteration < 2; iteration++ {
+				errp := tr.Platform.KillRandomInstance("dapr-placement-server")
+				require.NoError(t, errp)
+
+				sleepInSeconds := 10 + rand.Intn(5)
+				time.Sleep(time.Duration(sleepInSeconds) * time.Second)
+			}
+		}()
+
 		err := tr.Platform.RestartApps(serviceApplicationName, clientApplicationName)
+		require.NoError(t, err)
+
+		// Some sleep to make sure placement table dissemination happens on all sidecars.
+		time.Sleep(20 * time.Second)
+
+		// Reset errors since they can occurr during restart.
+		t.Logf("DELETE call for collector app url: %s", collectorAppURL+"/errors")
+		_, err = utils.HTTPDelete(collectorAppURL + "/errors")
 		require.NoError(t, err)
 
 		// Sleep is required, otherwise one of the restarts will fail:
 		// "Operation cannot be fulfilled on deployments.apps "chaos-actor-invoke-service": the object has been modified; please apply your changes to the latest version and try again"
+		// Also, it gives some time for invocations to work.
 		time.Sleep(10 * time.Second)
-	}
 
-	t.Logf("restarted sidecar multiple times already, now running validation ...")
-
-	t.Logf("DELETE call for collector app url: %s", collectorAppURL+"/errors")
-	_, err = utils.HTTPDelete(collectorAppURL + "/errors")
-	require.NoError(t, err)
-
-	// Let invocations run for some time.
-	time.Sleep(20 * time.Second)
-
-	// Now, validate that the invocations continued without any errors.
-	body, err = utils.HTTPGetNTimes(collectorAppURL+"/errors", numHealthChecks)
-	require.NoError(t, err)
-	globalErrors = []errorEntry{}
-	err = json.Unmarshal(body, &globalErrors)
-	require.NoError(t, err)
-	globalErrorCount = len(globalErrors)
-	noRouteToHostErrorCount := 0
-	for _, globalError := range globalErrors {
-		if strings.Contains(globalError.Message, "no route to host") {
-			noRouteToHostErrorCount += 1
+		// Now, validate that the invocations continued without any errors.
+		body, err = utils.HTTPGetNTimes(collectorAppURL+"/errors", numHealthChecks)
+		require.NoError(t, err)
+		globalErrors = []errorEntry{}
+		err = json.Unmarshal(body, &globalErrors)
+		require.NoError(t, err)
+		globalErrorCount = len(globalErrors)
+		noRouteToHostErrorCount := 0
+		for _, globalError := range globalErrors {
+			if strings.Contains(globalError.Message, "no route to host") {
+				noRouteToHostErrorCount += 1
+			}
 		}
-	}
 
-	t.Logf("found %d errors total, %d instances of 'no route to host'", globalErrorCount, noRouteToHostErrorCount)
+		t.Logf("iteration %d found %d errors total, %d instances of 'no route to host'", iteration, globalErrorCount, noRouteToHostErrorCount)
 
-	if noRouteToHostErrorCount > 0 {
-		require.Failf(t, "Found 'no route to host' errors", "There are %s instances of 'no route to host'", strconv.Itoa(noRouteToHostErrorCount))
+		if noRouteToHostErrorCount > 0 {
+			require.Failf(t, "Found 'no route to host' errors", "There are %s instances of 'no route to host'", strconv.Itoa(noRouteToHostErrorCount))
+		}
 	}
 }
