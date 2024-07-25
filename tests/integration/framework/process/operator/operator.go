@@ -119,7 +119,7 @@ func (o *Operator) Cleanup(t *testing.T) {
 func (o *Operator) WaitUntilRunning(t *testing.T, ctx context.Context) {
 	client := client.HTTP(t)
 	assert.Eventually(t, func() bool {
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("http://localhost:%d/healthz", o.healthzPort), nil)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/healthz", o.healthzPort), nil)
 		if err != nil {
 			return false
 		}

@@ -189,7 +189,7 @@ func (s *Sentry) Port() int {
 }
 
 func (s *Sentry) Address() string {
-	return "localhost:" + strconv.Itoa(s.Port())
+	return "127.0.0.1:" + strconv.Itoa(s.Port())
 }
 
 func (s *Sentry) MetricsPort() int {
