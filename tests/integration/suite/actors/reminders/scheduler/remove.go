@@ -135,9 +135,11 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 	})
 	require.NoError(t, err)
 
-	resp, err = etcdClient.Get(ctx, "dapr/jobs", clientv3.WithPrefix())
-	require.NoError(t, err)
-	assert.Equal(t, int64(1), resp.Count)
+	assert.EventuallyWithT(t, func(c *assert.CollectT) {
+		resp, err = etcdClient.Get(ctx, "dapr/jobs", clientv3.WithPrefix())
+		require.NoError(c, err)
+		assert.Equal(c, int64(1), resp.Count)
+	}, 10*time.Second, 10*time.Millisecond)
 
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		assert.Equal(c, int64(1), r.triggered.Load())
@@ -150,7 +152,9 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 	})
 	require.NoError(t, err)
 
-	resp, err = etcdClient.Get(ctx, "dapr/jobs", clientv3.WithPrefix())
-	require.NoError(t, err)
-	assert.Equal(t, int64(0), resp.Count)
+	assert.EventuallyWithT(t, func(c *assert.CollectT) {
+		resp, err = etcdClient.Get(ctx, "dapr/jobs", clientv3.WithPrefix())
+		require.NoError(c, err)
+		assert.Equal(c, int64(0), resp.Count)
+	}, 10*time.Second, 10*time.Millisecond)
 }
