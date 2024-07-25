@@ -72,7 +72,7 @@ spec:
 	}
 	r.scheduler = scheduler.New(t,
 		scheduler.WithID("scheduler-0"),
-		scheduler.WithInitialCluster(fmt.Sprintf("scheduler-0=http://localhost:%d", port1)),
+		scheduler.WithInitialCluster(fmt.Sprintf("scheduler-0=http://127.0.0.1:%d", port1)),
 		scheduler.WithInitialClusterPorts(port1),
 		scheduler.WithEtcdClientPorts(clientPorts),
 	)
@@ -109,7 +109,7 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 	client := r.daprd.GRPCClient(t, ctx)
 
 	etcdClient, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{fmt.Sprintf("localhost:%d", r.etcdPort)},
+		Endpoints:   []string{fmt.Sprintf("127.0.0.1:%d", r.etcdPort)},
 		DialTimeout: 5 * time.Second,
 	})
 	require.NoError(t, err)
