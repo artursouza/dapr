@@ -148,6 +148,38 @@ func (p *Placement) WaitUntilRunning(t *testing.T, ctx context.Context) {
 	}, time.Second*5, 10*time.Millisecond)
 }
 
+// WaitUntilLeader is useful for tests with a single placement server
+func (p *Placement) WaitUntilLeader(t *testing.T, ctx context.Context) {
+	p.WaitUntilRunning(t, ctx)
+
+	var stream placementv1pb.Placement_ReportDaprStatusClient
+	var err error
+	host := p.Address()
+	//nolint:staticcheck
+	conn, err := grpc.DialContext(ctx, host, grpc.WithBlock(), grpc.WithReturnConnectionError(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	require.NoError(t, err)
+	defer conn.Close()
+
+	client := placementv1pb.NewPlacementClient(conn)
+
+	require.Eventually(t, func() bool {
+		stream, err = client.ReportDaprStatus(ctx)
+		if err != nil {
+			return false
+		}
+
+		err = stream.Send(&placementv1pb.Host{})
+		return err == nil
+	}, 10*time.Second, 10*time.Millisecond)
+
+	require.Eventually(t, func() bool {
+		_, err = stream.Recv()
+		return err == nil
+	}, 10*time.Second, 10*time.Millisecond)
+}
+
 func (p *Placement) ID() string {
 	return p.id
 }
