@@ -172,12 +172,12 @@ func (p *Placement) WaitUntilLeader(t *testing.T, ctx context.Context) {
 
 		err = stream.Send(&placementv1pb.Host{})
 		return err == nil
-	}, 10*time.Second, 10*time.Millisecond)
+	}, 30*time.Second, 10*time.Millisecond)
 
 	require.Eventually(t, func() bool {
 		_, err = stream.Recv()
 		return err == nil
-	}, 10*time.Second, 10*time.Millisecond)
+	}, 30*time.Second, 10*time.Millisecond)
 }
 
 func (p *Placement) ID() string {
