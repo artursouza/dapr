@@ -55,7 +55,7 @@ func (n *noMax) Run(t *testing.T, ctx context.Context) {
 
 	httpClient := client.HTTP(t)
 
-	n.place.WaitUntilRunning(t, ctx)
+	n.place.WaitUntilLeader(t, ctx)
 
 	currentVersion := atomic.Uint32{}
 	lastVersionUpdate := atomic.Int64{}

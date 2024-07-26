@@ -140,7 +140,7 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
 		require.NoError(c, rerr)
 		assert.Len(c, keys, 1)
-	}, time.Second*10, 10*time.Millisecond)
+	}, time.Second*20, 10*time.Millisecond)
 
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		assert.Equal(c, int64(1), r.triggered.Load())

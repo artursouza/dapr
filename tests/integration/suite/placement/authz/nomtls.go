@@ -45,7 +45,7 @@ func (n *nomtls) Setup(t *testing.T) []framework.Option {
 }
 
 func (n *nomtls) Run(t *testing.T, ctx context.Context) {
-	n.place.WaitUntilRunning(t, ctx)
+	n.place.WaitUntilLeader(t, ctx)
 
 	host := n.place.Address()
 	//nolint:staticcheck

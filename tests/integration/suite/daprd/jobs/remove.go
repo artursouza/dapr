@@ -111,7 +111,7 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
-		require.NoError(c, rerr)
+		assert.NoError(c, rerr)
 		assert.Len(c, keys, 1)
 	}, time.Second*10, 10*time.Millisecond)
 
