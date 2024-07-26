@@ -117,7 +117,7 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
 		//nolint:testifylint
-		assert.NoError(c, rerr, fmt.Sprintf("error listing keys: %", rerr))
+		assert.NoError(c, rerr, fmt.Sprintf("error listing keys: %v", rerr))
 		assert.Empty(c, keys, fmt.Sprintf("expected no keys, but got %d", len(keys)))
 	}, time.Second*20, 10*time.Millisecond)
 
@@ -140,7 +140,7 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
 		//nolint:testifylint
-		assert.NoError(c, rerr, fmt.Sprintf("error listing keys: %", rerr))
+		assert.NoError(c, rerr, fmt.Sprintf("error listing keys: %v", rerr))
 		assert.Len(c, keys, 1, fmt.Sprintf("expected 1 key, got %d", len(keys)))
 	}, time.Second*20, 10*time.Millisecond)
 
@@ -158,7 +158,7 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
 		//nolint:testifylint
-		assert.NoError(c, rerr, fmt.Sprintf("error listing keys: %", rerr))
+		assert.NoError(c, rerr, fmt.Sprintf("error listing keys: %v", rerr))
 		assert.Empty(c, keys, fmt.Sprintf("expected no keys, but got %d", len(keys)))
 	}, time.Second*20, 10*time.Millisecond)
 }
