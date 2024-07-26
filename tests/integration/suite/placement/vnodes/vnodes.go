@@ -46,7 +46,7 @@ func (v *vnodes) Setup(t *testing.T) []framework.Option {
 }
 
 func (v *vnodes) Run(t *testing.T, ctx context.Context) {
-	v.place.WaitUntilRunning(t, ctx)
+	v.place.WaitUntilLeader(t, ctx)
 
 	t.Run("register host without vnodes metadata (simulating daprd <1.13)", func(t *testing.T) {
 		// Register the host, with API level 10 (pre v1.13)

@@ -44,7 +44,7 @@ func (n *notls) Setup(t *testing.T) []framework.Option {
 }
 
 func (n *notls) Run(t *testing.T, ctx context.Context) {
-	n.place.WaitUntilRunning(t, ctx)
+	n.place.WaitUntilLeader(t, ctx)
 
 	t.Run("actors in different namespaces are disseminated properly", func(t *testing.T) {
 		host1 := &v1pb.Host{
