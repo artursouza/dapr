@@ -118,7 +118,7 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
 		//nolint:testifylint
 		assert.NoError(c, rerr, "error listing keys"+rerr.Error())
-		assert.Empty(c, keys)
+		assert.Empty(c, keys, fmt.Sprintf("expected no keys, but got %d", len(keys)))
 	}, time.Second*20, 10*time.Millisecond)
 
 	_, err := client.InvokeActor(ctx, &runtimev1pb.InvokeActorRequest{
@@ -141,7 +141,7 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
 		//nolint:testifylint
 		assert.NoError(c, rerr, "error listing keys"+rerr.Error())
-		assert.Len(c, keys, 1)
+		assert.Len(c, keys, 1, fmt.Sprintf("expected 1 key, got %d", len(keys)))
 	}, time.Second*20, 10*time.Millisecond)
 
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
@@ -159,6 +159,6 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
 		//nolint:testifylint
 		assert.NoError(c, rerr, "error listing keys"+rerr.Error())
-		assert.Empty(c, keys)
+		assert.Empty(c, keys, fmt.Sprintf("expected no keys, but got %d", len(keys)))
 	}, time.Second*20, 10*time.Millisecond)
 }

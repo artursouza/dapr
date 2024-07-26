@@ -96,7 +96,7 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
 		require.NoError(c, rerr, "error listing keys"+rerr.Error())
-		assert.Empty(c, keys)
+		assert.Empty(c, keys, fmt.Sprintf("expected no keys, but got %d", len(keys)))
 	}, time.Second*30, 10*time.Millisecond)
 
 	req := &runtimev1pb.ScheduleJobRequest{
@@ -111,8 +111,8 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
-		assert.NoError(c, rerr)
-		assert.Len(c, keys, 1)
+		require.NoError(c, rerr, "error listing keys"+rerr.Error())
+		assert.Len(c, keys, 1, fmt.Sprintf("expected 1 key, but got %d", len(keys)))
 	}, time.Second*10, 10*time.Millisecond)
 
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
@@ -127,6 +127,6 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
 		require.NoError(c, rerr, "error listing keys"+rerr.Error())
-		assert.Empty(c, keys)
+		assert.Empty(c, keys, fmt.Sprintf("expected no keys, but got %d", len(keys)))
 	}, time.Second*30, 10*time.Millisecond)
 }
