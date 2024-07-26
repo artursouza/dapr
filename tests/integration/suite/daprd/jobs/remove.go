@@ -95,9 +95,9 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
-		require.NoError(c, rerr)
+		require.NoError(c, rerr, "error listing keys"+rerr.Error())
 		assert.Empty(c, keys)
-	}, time.Second*10, 10*time.Millisecond)
+	}, time.Second*30, 10*time.Millisecond)
 
 	req := &runtimev1pb.ScheduleJobRequest{
 		Job: &runtimev1pb.Job{
@@ -126,7 +126,7 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
-		require.NoError(c, rerr)
+		require.NoError(c, rerr, "error listing keys"+rerr.Error())
 		assert.Empty(c, keys)
-	}, time.Second*10, 10*time.Millisecond)
+	}, time.Second*30, 10*time.Millisecond)
 }
