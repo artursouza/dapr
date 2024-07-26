@@ -136,7 +136,7 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 			},
 		},
 	})
-	require.NoError(t, err, "Unexpected err message:"+err.Error())
+	require.NoError(t, err, fmt.Sprintf("Unexpected err message:", err))
 
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
