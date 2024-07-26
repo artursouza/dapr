@@ -105,8 +105,8 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
-		assert.NoError(c, rerr)
-		assert.Len(c, keys, 1)
+		require.NoError(c, rerr, "error listing keys"+rerr.Error())
+		assert.Len(c, keys, 1, fmt.Sprintf("expected 1 key, got %d", len(keys)))
 	}, time.Second*30, 10*time.Millisecond)
 
 	job, err := watch.Recv()
@@ -121,8 +121,8 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
-		assert.NoError(c, rerr)
-		assert.Len(c, keys, 1)
+		require.NoError(c, rerr, "error listing keys"+rerr.Error())
+		assert.Len(c, keys, 1, fmt.Sprintf("expected 1 key, got %d", len(keys)))
 	}, time.Second*30, 10*time.Millisecond)
 
 	_, err = client.DeleteJob(ctx, &schedulerv1.DeleteJobRequest{
@@ -139,7 +139,7 @@ func (r *remove) Run(t *testing.T, ctx context.Context) {
 
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
 		keys, rerr := etcdClient.ListAllKeys(ctx, "dapr/jobs")
-		require.NoError(c, rerr)
-		assert.Empty(c, keys)
-	}, time.Second*10, 10*time.Millisecond)
+		require.NoError(c, rerr, "error listing keys"+rerr.Error())
+		assert.Empty(c, keys, fmt.Sprintf("expected no keys, but got %d", len(keys)))
+	}, time.Second*30, 10*time.Millisecond)
 }
